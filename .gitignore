@@ -43,3 +43,12 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Firebase 보안 파일
+google-services.json
+GoogleService-Info.plist
+# Firebase 연동 시 자동 생성되는 파일, API키가 담겨있으니 일반 사이트에 등록 금지
+lib/firebase_options.dart
+
+# 환경변수 파일
+.env
