@@ -8,6 +8,8 @@ A new Flutter project.
 
 3/31 firestore 데이터 flutter 로 가져오기 완료 ## firestore의 timestamp 적용 완료
 
+3/31 flutter를 사용해서 firestore 데이터 수정하기 완료(현재 지정된 특정 부분의 string만 수정 가능)
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.
