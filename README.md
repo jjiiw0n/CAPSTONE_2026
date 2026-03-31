@@ -6,6 +6,8 @@ A new Flutter project.
 
 3/18 flutter 에 firebase 연동 완료
 
+3/31 firestore 데이터 flutter 로 가져오기 완료
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.
