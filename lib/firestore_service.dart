@@ -3,7 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class FirestoreService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  // 컬렉션 이름 상수 관리
   static const String tagsCollection = 'Tags';
   static const String calendarCollection = 'calendar';
   static const String categoriesCollection = 'categories';
@@ -13,23 +12,18 @@ class FirestoreService {
   Future<List<Map<String, dynamic>>> getTags() async {
     final snapshot = await _db.collection(tagsCollection).get();
 
-    print('가져온 태그 수: ${snapshot.docs.length}');
-    for (var doc in snapshot.docs) {
-      print('문서 ID: ${doc.id}');
-      print('TagID: ${doc['TagID']}');
-      print('Status: ${doc['Status']}');
-      print('Timestamp: ${doc['Timestamp']}');
-    }
-
     return snapshot.docs.map((doc) {
-      final timestamp = doc['Timestamp'] as Timestamp;
-      final dateTime = timestamp.toDate();
-      return {
-        'doc_id': doc.id,
-        'TagID': doc['TagID'],
-        'Status': doc['Status'],
-        'Timestamp': dateTime,
-      };
+      final data = doc.data();
+      // Timestamp 필드 자동 변환
+      Map<String, dynamic> result = {'doc_id': doc.id};
+      data.forEach((key, value) {
+        if (value is Timestamp) {
+          result[key] = value.toDate();
+        } else {
+          result[key] = value;
+        }
+      });
+      return result;
     }).toList();
   }
 
@@ -39,75 +33,65 @@ class FirestoreService {
 
     return snapshot.docs.map((doc) {
       final data = doc.data();
-
-      Map<String, dynamic> fields = {};
+      Map<String, dynamic> result = {'doc_id': doc.id};
       data.forEach((key, value) {
         if (value is Timestamp) {
-          fields[key] = value.toDate();
+          result[key] = value.toDate();
         } else {
-          fields[key] = value;
+          result[key] = value;
         }
       });
-
-      return {'doc_id': doc.id, 'fields': fields};
+      return result;
     }).toList();
   }
 
   // categories 컬렉션 데이터 가져오기
-  Future<Map<String, dynamic>> getCategories() async {
+  Future<List<Map<String, dynamic>>> getCategories() async {
     final snapshot = await _db.collection(categoriesCollection).get();
 
-    Map<String, dynamic> result = {};
-
-    for (var doc in snapshot.docs) {
+    return snapshot.docs.map((doc) {
       final data = doc.data();
-
-      if (doc.id == 'essential') {
-        result['essential'] = {
-          'categoryName': data['categoryName'] ?? '',
-          'description': data['description'] ?? '',
-          'startTime': data['startTime'] ?? '',
-          'targetDays': data['targetDays'],
-        };
-      } else if (doc.id == 'school') {
-        result['school'] = {
-          'categoryName': data['categoryName'] ?? '',
-          'description': data['description'] ?? '',
-          'isActive': data['isActive'] ?? false,
-          'startTime': data['startTime'] ?? '',
-          'targetDays': data['targetDays'] ?? [],
-        };
-      } else if (doc.id == 'unassigned') {
-        result['unassigned'] = {'name1': data['name1'] ?? ''};
-      }
-    }
-
-    return result;
+      Map<String, dynamic> result = {'doc_id': doc.id};
+      data.forEach((key, value) {
+        if (value is Timestamp) {
+          result[key] = value.toDate();
+        } else {
+          result[key] = value;
+        }
+      });
+      return result;
+    }).toList();
   }
 
   // system_control 컬렉션 데이터 가져오기
-  Future<Map<String, dynamic>> getSystemControl() async {
+  Future<List<Map<String, dynamic>>> getSystemControl() async {
     final snapshot = await _db.collection(systemControlCollection).get();
 
-    Map<String, dynamic> result = {};
-
-    for (var doc in snapshot.docs) {
+    return snapshot.docs.map((doc) {
       final data = doc.data();
-
-      if (doc.id == 'Tag_ID') {
-        result['Tag_ID'] = {'new': data['new'] ?? ''};
-      } else if (doc.id == 'rpi_01') {
-        result['rpi_01'] = {'mode': data['mode'] ?? ''};
-      }
-    }
-
-    return result;
+      Map<String, dynamic> result = {'doc_id': doc.id};
+      data.forEach((key, value) {
+        if (value is Timestamp) {
+          result[key] = value.toDate();
+        } else {
+          result[key] = value;
+        }
+      });
+      return result;
+    }).toList();
   }
 
-  // calendar/flutter_Test 문서의 test 필드 업데이트
+  // calendar/flutter_Test 문서의 test 필드 수정
   Future<void> updateCalendarTest(String value) async {
     await _db.collection(calendarCollection).doc('flutter_Test').update({
       'test': value,
+    });
+  }
+
+  // calendar/flutter_Test 문서에 새 필드 추가
+  Future<void> addFieldToFlutterTest(String fieldName, dynamic value) async {
+    await _db.collection(calendarCollection).doc('flutter_Test').update({
+      fieldName: value,
     });
   }
 }

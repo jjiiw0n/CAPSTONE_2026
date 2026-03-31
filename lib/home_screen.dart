@@ -11,11 +11,13 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final FirestoreService _service = FirestoreService();
   final TextEditingController _testController = TextEditingController();
+  final TextEditingController _fieldNameController = TextEditingController();
+  final TextEditingController _fieldValueController = TextEditingController();
 
   List<Map<String, dynamic>> _tags = [];
   List<Map<String, dynamic>> _calendar = [];
-  Map<String, dynamic> _categories = {};
-  Map<String, dynamic> _systemControl = {};
+  List<Map<String, dynamic>> _categories = [];
+  List<Map<String, dynamic>> _systemControl = [];
 
   @override
   void initState() {
@@ -26,6 +28,8 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void dispose() {
     _testController.dispose();
+    _fieldNameController.dispose();
+    _fieldValueController.dispose();
     super.dispose();
   }
 
@@ -48,6 +52,30 @@ class _HomeScreenState extends State<HomeScreen> {
         '${dateTime.hour}시 ${dateTime.minute}분';
   }
 
+  // 문서 하나를 자동으로 표시하는 위젯
+  Widget _buildDocumentTile(Map<String, dynamic> doc) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ListTile(
+          title: Text(
+            '${doc['doc_id']}',
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+        ),
+        ...doc.entries.where((entry) => entry.key != 'doc_id').map((entry) {
+          final value = entry.value;
+          return ListTile(
+            title: Text(entry.key),
+            trailing: Text(
+              value is DateTime ? _formatDateTime(value) : '$value',
+            ),
+          );
+        }),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -58,38 +86,15 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             // Tags 섹션
             _buildSectionTitle('Tags'),
-            ..._tags.map(
-              (tag) => ListTile(
-                title: Text('TagID: ${tag['TagID']}'),
-                subtitle: Text('Status: ${tag['Status']}'),
-                trailing: Text(_formatDateTime(tag['Timestamp'] as DateTime)),
-              ),
-            ),
+            ..._tags.map((doc) => _buildDocumentTile(doc)),
 
             const Divider(),
 
             // Calendar 섹션
             _buildSectionTitle('Calendar'),
-            ..._calendar.map((item) {
-              final fields = item['fields'] as Map<String, dynamic>;
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ListTile(title: Text('${item['doc_id']}')),
-                  ...fields.entries.map((entry) {
-                    final value = entry.value;
-                    return ListTile(
-                      title: Text(entry.key),
-                      trailing: Text(
-                        value is DateTime ? _formatDateTime(value) : '$value',
-                      ),
-                    );
-                  }),
-                ],
-              );
-            }),
+            ..._calendar.map((doc) => _buildDocumentTile(doc)),
 
-            // flutter_Test 문서 수정 UI
+            // flutter_Test 수정 UI
             ListTile(title: const Text('flutter_Test - test 값 수정')),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -98,8 +103,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   Expanded(
                     child: TextField(
                       controller: _testController,
-                      keyboardType: TextInputType.text,
-                      textInputAction: TextInputAction.done,
                       decoration: const InputDecoration(
                         hintText: '새로운 값을 입력하세요',
                         border: OutlineInputBorder(),
@@ -119,92 +122,55 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
 
+            // flutter_Test 필드 추가 UI
+            ListTile(title: const Text('flutter_Test - 필드 추가')),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Column(
+                children: [
+                  TextField(
+                    controller: _fieldNameController,
+                    decoration: const InputDecoration(
+                      hintText: '필드 이름 입력',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _fieldValueController,
+                    decoration: const InputDecoration(
+                      hintText: '필드 값 입력',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  ElevatedButton(
+                    onPressed: () async {
+                      await _service.addFieldToFlutterTest(
+                        _fieldNameController.text,
+                        _fieldValueController.text,
+                      );
+                      _fieldNameController.clear();
+                      _fieldValueController.clear();
+                      await _loadAllData();
+                    },
+                    child: const Text('필드 추가'),
+                  ),
+                ],
+              ),
+            ),
+
             const Divider(),
 
             // Categories 섹션
             _buildSectionTitle('Categories'),
-
-            // essential
-            if (_categories.containsKey('essential')) ...[
-              ListTile(title: const Text('essential')),
-              ListTile(
-                title: const Text('categoryName'),
-                trailing: Text('${_categories['essential']['categoryName']}'),
-              ),
-              ListTile(
-                title: const Text('description'),
-                trailing: Text('${_categories['essential']['description']}'),
-              ),
-              ListTile(
-                title: const Text('startTime'),
-                trailing: Text('${_categories['essential']['startTime']}'),
-              ),
-              ListTile(
-                title: const Text('targetDays'),
-                trailing: Text(
-                  '${_categories['essential']['targetDays'] ?? 'null'}',
-                ),
-              ),
-            ],
-
-            // school
-            if (_categories.containsKey('school')) ...[
-              ListTile(title: const Text('school')),
-              ListTile(
-                title: const Text('categoryName'),
-                trailing: Text('${_categories['school']['categoryName']}'),
-              ),
-              ListTile(
-                title: const Text('description'),
-                trailing: Text('${_categories['school']['description']}'),
-              ),
-              ListTile(
-                title: const Text('isActive'),
-                trailing: Text('${_categories['school']['isActive']}'),
-              ),
-              ListTile(
-                title: const Text('startTime'),
-                trailing: Text('${_categories['school']['startTime']}'),
-              ),
-              ListTile(
-                title: const Text('targetDays'),
-                trailing: Text(
-                  (_categories['school']['targetDays'] as List).join(', '),
-                ),
-              ),
-            ],
-
-            // unassigned
-            if (_categories.containsKey('unassigned')) ...[
-              ListTile(title: const Text('unassigned')),
-              ListTile(
-                title: const Text('name1'),
-                trailing: Text('${_categories['unassigned']['name1']}'),
-              ),
-            ],
+            ..._categories.map((doc) => _buildDocumentTile(doc)),
 
             const Divider(),
 
             // System Control 섹션
             _buildSectionTitle('System Control'),
-
-            // Tag_ID
-            if (_systemControl.containsKey('Tag_ID')) ...[
-              ListTile(title: const Text('Tag_ID')),
-              ListTile(
-                title: const Text('new'),
-                trailing: Text('${_systemControl['Tag_ID']['new']}'),
-              ),
-            ],
-
-            // rpi_01
-            if (_systemControl.containsKey('rpi_01')) ...[
-              ListTile(title: const Text('rpi_01')),
-              ListTile(
-                title: const Text('mode'),
-                trailing: Text('${_systemControl['rpi_01']['mode']}'),
-              ),
-            ],
+            ..._systemControl.map((doc) => _buildDocumentTile(doc)),
           ],
         ),
       ),
