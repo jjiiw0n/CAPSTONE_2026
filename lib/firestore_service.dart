@@ -103,4 +103,11 @@ class FirestoreService {
 
     return result;
   }
+
+  // calendar/flutter_Test 문서의 test 필드 업데이트
+  Future<void> updateCalendarTest(String value) async {
+    await _db.collection(calendarCollection).doc('flutter_Test').update({
+      'test': value,
+    });
+  }
 }

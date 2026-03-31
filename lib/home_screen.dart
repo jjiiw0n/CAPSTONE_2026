@@ -10,6 +10,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final FirestoreService _service = FirestoreService();
+  final TextEditingController _testController = TextEditingController();
 
   List<Map<String, dynamic>> _tags = [];
   List<Map<String, dynamic>> _calendar = [];
@@ -20,6 +21,12 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _loadAllData();
+  }
+
+  @override
+  void dispose() {
+    _testController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadAllData() async {
@@ -81,6 +88,36 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               );
             }),
+
+            // flutter_Test 문서 수정 UI
+            ListTile(title: const Text('flutter_Test - test 값 수정')),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _testController,
+                      keyboardType: TextInputType.text,
+                      textInputAction: TextInputAction.done,
+                      decoration: const InputDecoration(
+                        hintText: '새로운 값을 입력하세요',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  ElevatedButton(
+                    onPressed: () async {
+                      await _service.updateCalendarTest(_testController.text);
+                      _testController.clear();
+                      await _loadAllData();
+                    },
+                    child: const Text('수정'),
+                  ),
+                ],
+              ),
+            ),
 
             const Divider(),
 
