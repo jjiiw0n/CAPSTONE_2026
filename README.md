@@ -2,11 +2,11 @@
 
 A new Flutter project.
 
-3/18 flutter 기본 앱 화면 구축 완료 ## android studio 로 테스트 필요
+3/18 flutter 기본 앱 화면 구축 완료 ## android studio 로 테스트 필요 -> 테스트 완료
 
 3/18 flutter 에 firebase 연동 완료
 
-3/31 firestore 데이터 flutter 로 가져오기 완료
+3/31 firestore 데이터 flutter 로 가져오기 완료 ## firestore의 timestamp 적용 완료
 
 ## Getting Started
 
