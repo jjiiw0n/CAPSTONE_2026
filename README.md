@@ -2,6 +2,10 @@
 
 A new Flutter project.
 
+3/18 flutter 기본 앱 화면 구축 완료 ## android studio 로 테스트 필요
+
+3/18 flutter 에 firebase 연동 완료
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.
