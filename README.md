@@ -10,6 +10,8 @@ A new Flutter project.
 
 3/31 flutter를 사용해서 firestore 데이터 수정하기 완료(현재 지정된 특정 부분의 string만 수정 가능)
 
+3/31 flutter를 사용해서 firestore 데이터 추가하기 기능 추가(현재 지정된 특정 부분의 field만 생성 가능)
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.
